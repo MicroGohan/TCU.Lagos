@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}{{ titulo }} - TCU Lagos{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{{ titulo }}</h1>
+    <a href="{{ url_for('estudiantes.index') }}" class="btn btn-outline">&larr; Volver</a>
+</div>
+
+<div class="card">
+    <form method="post" action="{{ accion }}" novalidate>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="cedula">Cédula <span class="required">*</span></label>
+                <input
+                    type="text"
+                    id="cedula"
+                    name="cedula"
+                    class="form-control"
+                    value="{{ form.get('cedula', '') }}"
+                    placeholder="Ej. 1-1234-5678"
+                    required
+                />
+            </div>
+
+            <div class="form-group">
+                <label for="fecha_nac">Fecha de Nacimiento</label>
+                <input
+                    type="date"
+                    id="fecha_nac"
+                    name="fecha_nac"
+                    class="form-control"
+                    value="{{ form.get('fecha_nac', '') }}"
+                />
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="nombre">Nombre <span class="required">*</span></label>
+                <input
+                    type="text"
+                    id="nombre"
+                    name="nombre"
+                    class="form-control"
+                    value="{{ form.get('nombre', '') }}"
+                    placeholder="Nombre(s)"
+                    required
+                />
+            </div>
+
+            <div class="form-group">
+                <label for="apellido">Apellido <span class="required">*</span></label>
+                <input
+                    type="text"
+                    id="apellido"
+                    name="apellido"
+                    class="form-control"
+                    value="{{ form.get('apellido', '') }}"
+                    placeholder="Apellido(s)"
+                    required
+                />
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="email">Correo Electrónico <span class="required">*</span></label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    class="form-control"
+                    value="{{ form.get('email', '') }}"
+                    placeholder="correo@ejemplo.com"
+                    required
+                />
+            </div>
+
+            <div class="form-group">
+                <label for="telefono">Teléfono</label>
+                <input
+                    type="tel"
+                    id="telefono"
+                    name="telefono"
+                    class="form-control"
+                    value="{{ form.get('telefono', '') }}"
+                    placeholder="Ej. 8888-8888"
+                />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="carrera">Carrera <span class="required">*</span></label>
+            <select id="carrera" name="carrera" class="form-control" required>
+                <option value="">-- Seleccione una carrera --</option>
+                {% for carrera in carreras %}
+                    <option value="{{ carrera }}"
+                        {% if form.get('carrera') == carrera %}selected{% endif %}>
+                        {{ carrera }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <a href="{{ url_for('estudiantes.index') }}" class="btn btn-outline">Cancelar</a>
+        </div>
+
+    </form>
+</div>
+{% endblock %}

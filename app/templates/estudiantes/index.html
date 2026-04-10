@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Lista de Estudiantes - TCU Lagos{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Estudiantes Registrados</h1>
+    <a href="{{ url_for('estudiantes.nuevo') }}" class="btn btn-primary">+ Registrar Estudiante</a>
+</div>
+
+<form class="search-form" method="get" action="{{ url_for('estudiantes.index') }}">
+    <input
+        type="search"
+        name="q"
+        value="{{ query }}"
+        placeholder="Buscar por nombre, apellido o cédula..."
+        class="search-input"
+    />
+    <button type="submit" class="btn btn-secondary">Buscar</button>
+    {% if query %}
+        <a href="{{ url_for('estudiantes.index') }}" class="btn btn-outline">Limpiar</a>
+    {% endif %}
+</form>
+
+{% if estudiantes %}
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Cédula</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Carrera</th>
+                    <th>Correo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for e in estudiantes %}
+                <tr>
+                    <td>{{ e.id }}</td>
+                    <td>{{ e.cedula }}</td>
+                    <td>{{ e.nombre }}</td>
+                    <td>{{ e.apellido }}</td>
+                    <td><span class="badge">{{ e.carrera }}</span></td>
+                    <td>{{ e.email }}</td>
+                    <td class="actions">
+                        <a href="{{ url_for('estudiantes.detalle', estudiante_id=e.id) }}" class="btn btn-sm btn-info">Ver</a>
+                        <a href="{{ url_for('estudiantes.editar', estudiante_id=e.id) }}" class="btn btn-sm btn-warning">Editar</a>
+                        <form method="post" action="{{ url_for('estudiantes.eliminar', estudiante_id=e.id) }}"
+                              onsubmit="return confirm('¿Eliminar a {{ e.nombre }} {{ e.apellido }}?')">
+                            <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <p class="text-muted">Total: {{ estudiantes | length }} estudiante(s)</p>
+{% else %}
+    <div class="empty-state">
+        <p>
+            {% if query %}
+                No se encontraron estudiantes para "<strong>{{ query }}</strong>".
+            {% else %}
+                No hay estudiantes registrados aún.
+            {% endif %}
+        </p>
+        {% if not query %}
+            <a href="{{ url_for('estudiantes.nuevo') }}" class="btn btn-primary">Registrar primer estudiante</a>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,4 @@
+flask>=3.0.0
+
+# Dependencias de desarrollo / pruebas
+pytest>=7.0.0
