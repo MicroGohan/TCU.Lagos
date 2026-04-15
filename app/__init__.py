@@ -17,6 +17,8 @@ def create_app():
 
     # Registrar controladores (blueprints)
     from .controllers.estudiante_controller import estudiantes_bp
+    from .controllers.calificacion_controller import calificaciones_bp
     app.register_blueprint(estudiantes_bp)
+    app.register_blueprint(calificaciones_bp)
 
     return app

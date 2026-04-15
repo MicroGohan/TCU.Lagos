@@ -28,11 +28,34 @@ CREATE TABLE IF NOT EXISTS estudiantes (
     cedula      TEXT    NOT NULL UNIQUE,
     nombre      TEXT    NOT NULL,
     apellido    TEXT    NOT NULL,
-    email       TEXT    NOT NULL UNIQUE,
-    telefono    TEXT,
-    carrera     TEXT    NOT NULL,
+    sexo        TEXT,
+    seccion     TEXT,
     fecha_nac   TEXT,
+    telefono    TEXT,
     creado_en   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS calificaciones (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    estudiante_id       INTEGER NOT NULL,
+    anio_lectivo        INTEGER,
+    periodo             TEXT,
+    estudios_sociales     INTEGER,
+    ciencias            INTEGER,
+    espanol             INTEGER,
+    matematica          INTEGER,
+    educacion_agricola  INTEGER,
+    ingles              INTEGER,
+    educacion_musical   INTEGER,
+    educacion_religiosa INTEGER,
+    educacion_fisica    INTEGER,
+    educacion_hogar     INTEGER,
+    artes_industriales  INTEGER,
+    artes_plasticas     INTEGER,
+    frances             INTEGER,
+    conducta            INTEGER,
+    estado_final        TEXT,
+    FOREIGN KEY(estudiante_id) REFERENCES estudiantes(id)
 );
 """
 

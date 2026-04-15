@@ -12,21 +12,9 @@ from flask import (
     flash,
 )
 from ..models import estudiante as EstudianteModel
+from ..models import calificacion as CalificacionModel
 
 estudiantes_bp = Blueprint("estudiantes", __name__, url_prefix="/")
-
-CARRERAS = [
-    "Ingeniería en Sistemas",
-    "Ingeniería Industrial",
-    "Administración de Negocios",
-    "Contabilidad",
-    "Educación",
-    "Enfermería",
-    "Derecho",
-    "Medicina",
-    "Arquitectura",
-    "Otra",
-]
 
 
 def _validate_form(form):
@@ -38,10 +26,8 @@ def _validate_form(form):
         errors.append("El nombre es obligatorio.")
     if not form.get("apellido", "").strip():
         errors.append("El apellido es obligatorio.")
-    if not form.get("email", "").strip():
-        errors.append("El correo electrónico es obligatorio.")
-    if not form.get("carrera", "").strip():
-        errors.append("La carrera es obligatoria.")
+    if not form.get("seccion", "").strip():
+        errors.append("La sección es obligatoria.")
     return errors
 
 
@@ -74,8 +60,7 @@ def nuevo():
                 "estudiantes/form.html",
                 titulo="Registrar Estudiante",
                 accion=url_for("estudiantes.nuevo"),
-                carreras=CARRERAS,
-                form=request.form,
+                                form=request.form,
             )
 
         try:
@@ -83,22 +68,21 @@ def nuevo():
                 cedula=request.form["cedula"].strip(),
                 nombre=request.form["nombre"].strip(),
                 apellido=request.form["apellido"].strip(),
-                email=request.form["email"].strip(),
+                sexo=request.form.get("sexo", "").strip(),
                 telefono=request.form.get("telefono", "").strip(),
-                carrera=request.form["carrera"].strip(),
+                seccion=request.form["seccion"].strip(),
                 fecha_nac=request.form.get("fecha_nac", "").strip() or None,
             )
             flash("Estudiante registrado exitosamente.", "success")
             return redirect(url_for("estudiantes.index"))
         except sqlite3.IntegrityError:
-            flash("La cédula o el correo ya están registrados.", "danger")
+            flash("La cédula ya está registrada.", "danger")
 
     return render_template(
         "estudiantes/form.html",
         titulo="Registrar Estudiante",
         accion=url_for("estudiantes.nuevo"),
-        carreras=CARRERAS,
-        form={},
+                form={},
     )
 
 
@@ -109,7 +93,10 @@ def detalle(estudiante_id):
     if estudiante is None:
         flash("Estudiante no encontrado.", "warning")
         return redirect(url_for("estudiantes.index"))
-    return render_template("estudiantes/detalle.html", estudiante=estudiante)
+    
+    calificaciones = CalificacionModel.get_by_estudiante(estudiante_id)
+    
+    return render_template("estudiantes/detalle.html", estudiante=estudiante, calificaciones=calificaciones)
 
 
 @estudiantes_bp.route("/estudiantes/<int:estudiante_id>/editar", methods=["GET", "POST"])
@@ -129,8 +116,7 @@ def editar(estudiante_id):
                 "estudiantes/form.html",
                 titulo="Editar Estudiante",
                 accion=url_for("estudiantes.editar", estudiante_id=estudiante_id),
-                carreras=CARRERAS,
-                form=request.form,
+                                form=request.form,
             )
 
         try:
@@ -139,22 +125,21 @@ def editar(estudiante_id):
                 cedula=request.form["cedula"].strip(),
                 nombre=request.form["nombre"].strip(),
                 apellido=request.form["apellido"].strip(),
-                email=request.form["email"].strip(),
+                sexo=request.form.get("sexo", "").strip(),
                 telefono=request.form.get("telefono", "").strip(),
-                carrera=request.form["carrera"].strip(),
+                seccion=request.form["seccion"].strip(),
                 fecha_nac=request.form.get("fecha_nac", "").strip() or None,
             )
             flash("Estudiante actualizado exitosamente.", "success")
             return redirect(url_for("estudiantes.detalle", estudiante_id=estudiante_id))
         except sqlite3.IntegrityError:
-            flash("La cédula o el correo ya están registrados por otro estudiante.", "danger")
+            flash("La cédula ya está registrada por otro estudiante.", "danger")
 
     return render_template(
         "estudiantes/form.html",
         titulo="Editar Estudiante",
         accion=url_for("estudiantes.editar", estudiante_id=estudiante_id),
-        carreras=CARRERAS,
-        form=dict(estudiante),
+                form=dict(estudiante),
     )
 
 

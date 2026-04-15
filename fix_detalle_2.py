@@ -1,49 +1,8 @@
-{% extends "base.html" %}
+﻿
+with open("app/templates/estudiantes/detalle.html", "r", encoding="utf-8") as f:
+    text = f.read()
 
-{% block title %}{{ estudiante.nombre }} {{ estudiante.apellido }} - TCU Lagos{% endblock %}
-
-{% block content %}
-<div class="page-header">
-    <h1>Detalle del Estudiante</h1>
-    <div>
-        <a href="{{ url_for('estudiantes.editar', estudiante_id=estudiante.id) }}" class="btn btn-warning">Editar</a>
-        <a href="{{ url_for('estudiantes.index') }}" class="btn btn-outline">&larr; Volver</a>
-    </div>
-</div>
-
-<div class="card detail-card">
-    <div class="detail-header">
-        <div class="avatar">{{ estudiante.nombre[0] }}{{ estudiante.apellido[0] }}</div>
-        <div>
-            <h2>{{ estudiante.nombre }} {{ estudiante.apellido }}</h2>
-            <span class="badge">{{ estudiante.seccion }}</span>
-        </div>
-    </div>
-
-    <div class="detail-grid">
-        <div class="detail-item">
-            <span class="detail-label">Cédula</span>
-            <span class="detail-value">{{ estudiante.cedula }}</span>
-        </div>
-        <div class="detail-item">
-            <span class="detail-label">Correo Electrónico</span>
-            <span class="detail-value">{{ estudiante.sexo }}</span>
-        </div>
-        <div class="detail-item">
-            <span class="detail-label">Teléfono</span>
-            <span class="detail-value">{{ estudiante.telefono or '—' }}</span>
-        </div>
-        <div class="detail-item">
-            <span class="detail-label">Fecha de Nacimiento</span>
-            <span class="detail-value">{{ estudiante.fecha_nac or '—' }}</span>
-        </div>
-        <div class="detail-item">
-            <span class="detail-label">Fecha de Registro</span>
-            <span class="detail-value">{{ estudiante.creado_en }}</span>
-        </div>
-    </div>
-
-
+part_to_add = """
     <div class="mt-4">
         <h3>Calificaciones</h3>
         <a href="{{ url_for('calificaciones.nueva', estudiante_id=estudiante.id) }}" class="btn btn-sm btn-primary mb-2">+ Añadir Calificaciones</a>
@@ -108,11 +67,10 @@
     </div>
 
     <div class="form-actions mt-4">
+"""
 
-        <form method="post" action="{{ url_for('estudiantes.eliminar', estudiante_id=estudiante.id) }}"
-              onsubmit="return confirm('¿Está seguro de eliminar a {{ estudiante.nombre }} {{ estudiante.apellido }}?')">
-            <button type="submit" class="btn btn-danger">Eliminar Estudiante</button>
-        </form>
-    </div>
-</div>
-{% endblock %}
+text = text.replace("    <div class=\"form-actions mt-4\">", part_to_add)
+
+with open("app/templates/estudiantes/detalle.html", "w", encoding="utf-8") as f:
+    f.write(text)
+

@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 
 {% block title %}{{ titulo }} - TCU Lagos{% endblock %}
 
@@ -14,95 +14,45 @@
         <div class="form-row">
             <div class="form-group">
                 <label for="cedula">Cédula <span class="required">*</span></label>
-                <input
-                    type="text"
-                    id="cedula"
-                    name="cedula"
-                    class="form-control"
-                    value="{{ form.get('cedula', '') }}"
-                    placeholder="Ej. 1-1234-5678"
-                    required
-                />
+                <input type="text" id="cedula" name="cedula" class="form-control" value="{{ form.get('cedula', '') }}" placeholder="Ej. 1-1234-5678" required />
             </div>
-
             <div class="form-group">
                 <label for="fecha_nac">Fecha de Nacimiento</label>
-                <input
-                    type="date"
-                    id="fecha_nac"
-                    name="fecha_nac"
-                    class="form-control"
-                    value="{{ form.get('fecha_nac', '') }}"
-                />
+                <input type="date" id="fecha_nac" name="fecha_nac" class="form-control" value="{{ form.get('fecha_nac', '') }}" />
             </div>
         </div>
 
         <div class="form-row">
             <div class="form-group">
                 <label for="nombre">Nombre <span class="required">*</span></label>
-                <input
-                    type="text"
-                    id="nombre"
-                    name="nombre"
-                    class="form-control"
-                    value="{{ form.get('nombre', '') }}"
-                    placeholder="Nombre(s)"
-                    required
-                />
+                <input type="text" id="nombre" name="nombre" class="form-control" value="{{ form.get('nombre', '') }}" placeholder="Nombre(s)" required />
             </div>
-
             <div class="form-group">
                 <label for="apellido">Apellido <span class="required">*</span></label>
-                <input
-                    type="text"
-                    id="apellido"
-                    name="apellido"
-                    class="form-control"
-                    value="{{ form.get('apellido', '') }}"
-                    placeholder="Apellido(s)"
-                    required
-                />
+                <input type="text" id="apellido" name="apellido" class="form-control" value="{{ form.get('apellido', '') }}" placeholder="Apellido(s)" required />
             </div>
         </div>
 
         <div class="form-row">
             <div class="form-group">
-                <label for="email">Correo Electrónico <span class="required">*</span></label>
-                <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    class="form-control"
-                    value="{{ form.get('email', '') }}"
-                    placeholder="correo@ejemplo.com"
-                    required
-                />
+                <label for="sexo">Sexo</label>
+                <select id="sexo" name="sexo" class="form-control">  
+                    <option value="">-- Seleccione --</option>
+                    <option value="F" {% if form.get('sexo') == 'F' %}selected{% endif %}>Femenino</option>
+                    <option value="M" {% if form.get('sexo') == 'M' %}selected{% endif %}>Masculino</option>
+                </select>
             </div>
-
             <div class="form-group">
-                <label for="telefono">Teléfono</label>
-                <input
-                    type="tel"
-                    id="telefono"
-                    name="telefono"
-                    class="form-control"
-                    value="{{ form.get('telefono', '') }}"
-                    placeholder="Ej. 8888-8888"
-                />
+                <label for="seccion">Sección <span class="required">*</span></label>
+                <input type="text" id="seccion" name="seccion" class="form-control" value="{{ form.get('seccion', '') }}" placeholder="Ej. 2-3" required />
             </div>
         </div>
-
-        <div class="form-group">
-            <label for="carrera">Carrera <span class="required">*</span></label>
-            <select id="carrera" name="carrera" class="form-control" required>
-                <option value="">-- Seleccione una carrera --</option>
-                {% for carrera in carreras %}
-                    <option value="{{ carrera }}"
-                        {% if form.get('carrera') == carrera %}selected{% endif %}>
-                        {{ carrera }}
-                    </option>
-                {% endfor %}
-            </select>
+        
+        <div class="form-row">
+            <div class="form-group">
+                 <label for="telefono">Teléfono</label>
+                 <input type="tel" id="telefono" name="telefono" class="form-control" value="{{ form.get('telefono', '') }}" placeholder="Ej. 8888-8888" />
+            </div>
         </div>
 
         <div class="form-actions">
@@ -112,4 +62,6 @@
 
     </form>
 </div>
+
+
 {% endblock %}

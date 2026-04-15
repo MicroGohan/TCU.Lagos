@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}{{ titulo }} - {{ estudiante.nombre }} {{ estudiante.apellido }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{{ titulo }}</h1>
+    <h4>Estudiante: {{ estudiante.nombre }} {{ estudiante.apellido }} ({{ estudiante.seccion }})</h4>
+    <a href="{{ url_for('estudiantes.detalle', estudiante_id=estudiante.id) }}" class="btn btn-outline">&larr; Volver</a>
+</div>
+
+<div class="card">
+    <form method="post" novalidate>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="anio_lectivo">Año Lectivo</label>
+                <input type="number" id="anio_lectivo" name="anio_lectivo" class="form-control" value="{{ form.get('anio_lectivo', '') }}" placeholder="Ej. 2019" />
+            </div>
+            <div class="form-group">
+                <label for="periodo">Ciclo / Periodo</label>
+                <input type="text" id="periodo" name="periodo" class="form-control" value="{{ form.get('periodo', '') }}" placeholder="Ej. I Ciclo" />
+            </div>
+            <div class="form-group">
+                <label for="estado_final">Estado Final</label>
+                <select id="estado_final" name="estado_final" class="form-control">
+                    <option value="">-- Seleccione --</option>
+                    <option value="APROBADO" {% if form.get('estado_final') == 'APROBADO' %}selected{% endif %}>APROBADO</option>
+                    <option value="REPROBADO" {% if form.get('estado_final') == 'REPROBADO' %}selected{% endif %}>REPROBADO</option>
+                    <option value="APLAZADO" {% if form.get('estado_final') == 'APLAZADO' %}selected{% endif %}>APLAZADO</option>
+                </select>
+            </div>
+        </div>
+
+        <hr>
+        <h4>Notas por Materia</h4>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="estudios_sociales">Estudios Sociales</label>
+                <input type="number" id="estudios_sociales" name="estudios_sociales" class="form-control" value="{{ form.get('estudios_sociales', '') }}" />
+            </div>
+            <div class="form-group">
+                <label for="ciencias">Educación Científica</label>
+                <input type="number" id="ciencias" name="ciencias" class="form-control" value="{{ form.get('ciencias', '') }}" />
+            </div>
+            <div class="form-group">
+                <label for="espanol">Español</label>
+                <input type="number" id="espanol" name="espanol" class="form-control" value="{{ form.get('espanol', '') }}" />
+            </div>
+            <div class="form-group">
+                <label for="matematica">Matemática</label>
+                <input type="number" id="matematica" name="matematica" class="form-control" value="{{ form.get('matematica', '') }}" />
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="educacion_agricola">Educación Agrícola</label>
+                <input type="number" id="educacion_agricola" name="educacion_agricola" class="form-control" value="{{ form.get('educacion_agricola', '') }}" />
+            </div>
+            <div class="form-group">
+                <label for="ingles">Inglés</label>
+                <input type="number" id="ingles" name="ingles" class="form-control" value="{{ form.get('ingles', '') }}" />
+            </div>
+            <div class="form-group">
+                <label for="educacion_musical">Educación Musical</label>
+                <input type="number" id="educacion_musical" name="educacion_musical" class="form-control" value="{{ form.get('educacion_musical', '') }}" />
+            </div>
+            <div class="form-group">
+                <label for="educacion_religiosa">Educación Religiosa</label>
+                <input type="number" id="educacion_religiosa" name="educacion_religiosa" class="form-control" value="{{ form.get('educacion_religiosa', '') }}" />
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="educacion_fisica">Educación Física</label>
+                <input type="number" id="educacion_fisica" name="educacion_fisica" class="form-control" value="{{ form.get('educacion_fisica', '') }}" />
+            </div>
+            <div class="form-group">
+                <label for="educacion_hogar">Educación para el Hogar</label>
+                <input type="number" id="educacion_hogar" name="educacion_hogar" class="form-control" value="{{ form.get('educacion_hogar', '') }}" />
+            </div>
+            <div class="form-group">
+                <label for="artes_industriales">Artes Industriales</label>
+                <input type="number" id="artes_industriales" name="artes_industriales" class="form-control" value="{{ form.get('artes_industriales', '') }}" />
+            </div>
+            <div class="form-group">
+                <label for="artes_plasticas">Artes Plásticas</label>
+                <input type="number" id="artes_plasticas" name="artes_plasticas" class="form-control" value="{{ form.get('artes_plasticas', '') }}" />
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="frances">Francés</label>
+                <input type="number" id="frances" name="frances" class="form-control" value="{{ form.get('frances', '') }}" />
+            </div>
+            <div class="form-group">
+                <label for="conducta">Conducta</label>
+                <input type="number" id="conducta" name="conducta" class="form-control" value="{{ form.get('conducta', '') }}" />
+            </div>
+        </div>
+
+        <div class="form-actions mt-4">
+            <button type="submit" class="btn btn-primary">Guardar Calificaciones</button>
+            <a href="{{ url_for('estudiantes.detalle', estudiante_id=estudiante.id) }}" class="btn btn-outline">Cancelar</a>
+        </div>
+
+    </form>
+</div>
+{% endblock %}

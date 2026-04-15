@@ -31,8 +31,8 @@
                     <th>Cédula</th>
                     <th>Nombre</th>
                     <th>Apellido</th>
-                    <th>Carrera</th>
-                    <th>Correo</th>
+                    <th>Sección</th>
+                    <th>Sexo</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -43,8 +43,8 @@
                     <td>{{ e.cedula }}</td>
                     <td>{{ e.nombre }}</td>
                     <td>{{ e.apellido }}</td>
-                    <td><span class="badge">{{ e.carrera }}</span></td>
-                    <td>{{ e.email }}</td>
+                    <td><span class="badge">{{ e.seccion }}</span></td>
+                    <td>{{ e.sexo }}</td>
                     <td class="actions">
                         <a href="{{ url_for('estudiantes.detalle', estudiante_id=e.id) }}" class="btn btn-sm btn-info">Ver</a>
                         <a href="{{ url_for('estudiantes.editar', estudiante_id=e.id) }}" class="btn btn-sm btn-warning">Editar</a>
