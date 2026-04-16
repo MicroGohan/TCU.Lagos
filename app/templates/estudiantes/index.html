@@ -5,7 +5,12 @@
 {% block content %}
 <div class="page-header">
     <h1>Estudiantes Registrados</h1>
-    <a href="{{ url_for('estudiantes.nuevo') }}" class="btn btn-primary">+ Registrar Estudiante</a>
+    <div>
+        <a href="{{ url_for('estudiantes.imprimir_todos') }}" class="btn btn-secondary" target="_blank">🖨️ Imprimir Todos</a>
+        {% if g.user and g.user.rol in ['admin', 'direccion'] %}
+        <a href="{{ url_for('estudiantes.nuevo') }}" class="btn btn-primary">+ Registrar Estudiante</a>
+        {% endif %}
+    </div>
 </div>
 
 <form class="search-form" method="get" action="{{ url_for('estudiantes.index') }}">
@@ -31,7 +36,7 @@
                     <th>Cédula</th>
                     <th>Nombre</th>
                     <th>Apellido</th>
-                    <th>Sección</th>
+                    
                     <th>Sexo</th>
                     <th>Acciones</th>
                 </tr>
@@ -43,15 +48,17 @@
                     <td>{{ e.cedula }}</td>
                     <td>{{ e.nombre }}</td>
                     <td>{{ e.apellido }}</td>
-                    <td><span class="badge">{{ e.seccion }}</span></td>
+                    
                     <td>{{ e.sexo }}</td>
                     <td class="actions">
                         <a href="{{ url_for('estudiantes.detalle', estudiante_id=e.id) }}" class="btn btn-sm btn-info">Ver</a>
+                        {% if g.user and g.user.rol in ['admin', 'direccion'] %}
                         <a href="{{ url_for('estudiantes.editar', estudiante_id=e.id) }}" class="btn btn-sm btn-warning">Editar</a>
                         <form method="post" action="{{ url_for('estudiantes.eliminar', estudiante_id=e.id) }}"
                               onsubmit="return confirm('¿Eliminar a {{ e.nombre }} {{ e.apellido }}?')">
                             <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
                         </form>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
@@ -68,7 +75,7 @@
                 No hay estudiantes registrados aún.
             {% endif %}
         </p>
-        {% if not query %}
+        {% if not query and g.user and g.user.rol in ['admin', 'direccion'] %}
             <a href="{{ url_for('estudiantes.nuevo') }}" class="btn btn-primary">Registrar primer estudiante</a>
         {% endif %}
     </div>

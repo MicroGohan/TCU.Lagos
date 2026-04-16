@@ -3,6 +3,7 @@ Controlador de Calificaciones - TCU Lagos
 Define rutas para la gestión de las notas de los estudiantes.
 """
 from flask import Blueprint, render_template, request, redirect, url_for, flash
+from .auth_controller import login_required, rol_requerido
 from ..models import estudiante as EstudianteModel
 from ..models import calificacion as CalificacionModel
 
@@ -16,6 +17,8 @@ MATERIAS = [
 ]
 
 @calificaciones_bp.route("/nueva", methods=["GET", "POST"])
+@login_required
+@rol_requerido('admin', 'direccion')
 def nueva(estudiante_id):
     estudiante = EstudianteModel.get_by_id(estudiante_id)
     if not estudiante:
@@ -27,6 +30,7 @@ def nueva(estudiante_id):
             "estudiante_id": estudiante_id,
             "anio_lectivo": request.form.get("anio_lectivo", "").strip() or None,
             "periodo": request.form.get("periodo", "").strip() or None,
+            "seccion": request.form.get("seccion", "").strip() or None,
             "estado_final": request.form.get("estado_final", "").strip() or None,
         }
         for mat in MATERIAS:
@@ -45,6 +49,8 @@ def nueva(estudiante_id):
     )
 
 @calificaciones_bp.route("/<int:calificacion_id>/editar", methods=["GET", "POST"])
+@login_required
+@rol_requerido('admin', 'direccion')
 def editar(estudiante_id, calificacion_id):
     estudiante = EstudianteModel.get_by_id(estudiante_id)
     calificacion = CalificacionModel.get_by_id(calificacion_id)
@@ -56,6 +62,7 @@ def editar(estudiante_id, calificacion_id):
         data = {
             "anio_lectivo": request.form.get("anio_lectivo", "").strip() or None,
             "periodo": request.form.get("periodo", "").strip() or None,
+            "seccion": request.form.get("seccion", "").strip() or None,
             "estado_final": request.form.get("estado_final", "").strip() or None,
         }
         for mat in MATERIAS:
@@ -74,6 +81,8 @@ def editar(estudiante_id, calificacion_id):
     )
 
 @calificaciones_bp.route("/<int:calificacion_id>/eliminar", methods=["POST"])
+@login_required
+@rol_requerido('admin', 'direccion')
 def eliminar(estudiante_id, calificacion_id):
     CalificacionModel.delete(calificacion_id)
     flash("Calificaciones eliminadas.", "success")

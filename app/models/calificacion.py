@@ -29,13 +29,13 @@ def create(data):
     db = _get_db()
     cursor = db.execute(
         """INSERT INTO calificaciones (
-            estudiante_id, anio_lectivo, periodo, estudios_sociales, ciencias, espanol,
+            estudiante_id, anio_lectivo, periodo, seccion, estudios_sociales, ciencias, espanol,
             matematica, educacion_agricola, ingles, educacion_musical,
             educacion_religiosa, educacion_fisica, educacion_hogar,
             artes_industriales, artes_plasticas, frances, conducta, estado_final
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (
-            data["estudiante_id"], data.get("anio_lectivo"), data.get("periodo"),
+            data["estudiante_id"], data.get("anio_lectivo"), data.get("periodo"), data.get("seccion"),
             data.get("estudios_sociales"), data.get("ciencias"), data.get("espanol"),
             data.get("matematica"), data.get("educacion_agricola"), data.get("ingles"),
             data.get("educacion_musical"), data.get("educacion_religiosa"), data.get("educacion_fisica"),
@@ -50,13 +50,13 @@ def update(calificacion_id, data):
     db = _get_db()
     db.execute(
         """UPDATE calificaciones SET
-            anio_lectivo=?, periodo=?, estudios_sociales=?, ciencias=?, espanol=?,
+            anio_lectivo=?, periodo=?, seccion=?, estudios_sociales=?, ciencias=?, espanol=?,
             matematica=?, educacion_agricola=?, ingles=?, educacion_musical=?,
             educacion_religiosa=?, educacion_fisica=?, educacion_hogar=?,
             artes_industriales=?, artes_plasticas=?, frances=?, conducta=?, estado_final=?
         WHERE id=?""",
         (
-            data.get("anio_lectivo"), data.get("periodo"), data.get("estudios_sociales"),
+            data.get("anio_lectivo"), data.get("periodo"), data.get("seccion"), data.get("estudios_sociales"),
             data.get("ciencias"), data.get("espanol"), data.get("matematica"),
             data.get("educacion_agricola"), data.get("ingles"), data.get("educacion_musical"),
             data.get("educacion_religiosa"), data.get("educacion_fisica"), data.get("educacion_hogar"),

@@ -14,7 +14,11 @@
         <div class="form-row">
             <div class="form-group">
                 <label for="cedula">Cédula <span class="required">*</span></label>
-                <input type="text" id="cedula" name="cedula" class="form-control" value="{{ form.get('cedula', '') }}" placeholder="Ej. 1-1234-5678" required />
+                <div class="input-group">
+                    <input type="text" id="cedula" name="cedula" class="form-control" value="{{ form.get('cedula', '') }}" placeholder="Ej. 101230456 o DIMEX" required style="width: calc(100% - 100px); display: inline-block;" />
+                    <button type="button" id="btn-buscar-cedula" class="btn btn-secondary" style="width: 90px; padding: 8px;">Buscar</button>
+                </div>
+                <small class="form-text text-muted" id="estado-busqueda">Presione Buscar para autocompletar desde el Registro.</small>
             </div>
             <div class="form-group">
                 <label for="fecha_nac">Fecha de Nacimiento</label>
@@ -42,10 +46,7 @@
                     <option value="M" {% if form.get('sexo') == 'M' %}selected{% endif %}>Masculino</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label for="seccion">Sección <span class="required">*</span></label>
-                <input type="text" id="seccion" name="seccion" class="form-control" value="{{ form.get('seccion', '') }}" placeholder="Ej. 2-3" required />
-            </div>
+            
         </div>
         
         <div class="form-row">
@@ -62,6 +63,45 @@
 
     </form>
 </div>
+
+<script>
+    document.getElementById("btn-buscar-cedula").addEventListener("click", function() {
+        const cedulaInput = document.getElementById("cedula").value.trim().replace(/-/g, "");
+        const estadoLabel = document.getElementById("estado-busqueda");
+        
+        if (cedulaInput.length < 9) {
+            estadoLabel.textContent = "Ingrese una cédula de al menos 9 dígitos.";
+            estadoLabel.style.color = "red";
+            return;
+        }
+
+        estadoLabel.textContent = "Buscando...";
+        estadoLabel.style.color = "blue";
+        
+        fetch("https://apis.gometa.org/cedulas/" + cedulaInput)
+            .then(response => response.json())
+            .then(data => {
+                if (data.results && data.results.length > 0) {
+                    const result = data.results[0];
+                    document.getElementById("nombre").value = result.firstname || "";
+                    document.getElementById("apellido").value = (result.lastname1 + " " + result.lastname2).trim();
+
+                    // Nota: No se puede obtener el sexo ni la fecha de nacimiento por la API pública.
+                    
+                    estadoLabel.textContent = "¡Datos encontrados y autocompletados!";
+                    estadoLabel.style.color = "green";
+                } else {
+                    estadoLabel.textContent = "No se encontraron datos para esta cédula.";
+                    estadoLabel.style.color = "red";
+                }
+            })
+            .catch(error => {
+                console.error("Error consultando API de cédulas:", error);
+                estadoLabel.textContent = "Error al buscar cédula.";
+                estadoLabel.style.color = "red";
+            });
+    });
+</script>
 
 
 {% endblock %}

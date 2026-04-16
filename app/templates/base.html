@@ -12,10 +12,16 @@
             <a class="brand" href="{{ url_for('estudiantes.index') }}">
                 🎓 TCU Lagos
             </a>
+            {% if g.user %}
             <nav>
+                <span class="user-badge" style="margin-right: 15px;">👤 {{ g.user.nombre_completo }} ({{ g.user.rol|capitalize }})</span>
                 <a href="{{ url_for('estudiantes.index') }}">Estudiantes</a>
+                {% if g.user.rol in ['admin', 'direccion'] %}
                 <a href="{{ url_for('estudiantes.nuevo') }}" class="btn btn-primary">+ Registrar</a>
+                {% endif %}
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-outline" style="margin-left: 10px;">Salir</a>
             </nav>
+            {% endif %}
         </div>
     </header>
 
@@ -23,7 +29,9 @@
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% if request.endpoint != 'auth.login' and not ('login' in request.path) %}
+                        <div class="alert alert-{{ category if category != 'error' else 'danger' }}">{{ message }}</div>
+                    {% endif %}
                 {% endfor %}
             {% endif %}
         {% endwith %}
@@ -33,7 +41,7 @@
 
     <footer class="footer">
         <div class="container">
-            <p>TCU Lagos &mdash; Trabajo Comunal Universitario &copy; 2024</p>
+            <p>TCU Lagos &mdash; Trabajo Comunal Universitario &copy; 2026</p>
         </div>
     </footer>
 </body>

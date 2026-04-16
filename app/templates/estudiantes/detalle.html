@@ -6,7 +6,10 @@
 <div class="page-header">
     <h1>Detalle del Estudiante</h1>
     <div>
+        {% if g.user and g.user.rol in ['admin', 'direccion'] %}
         <a href="{{ url_for('estudiantes.editar', estudiante_id=estudiante.id) }}" class="btn btn-warning">Editar</a>
+        {% endif %}
+        <a href="{{ url_for('estudiantes.imprimir_individual', estudiante_id=estudiante.id) }}" class="btn btn-primary" target="_blank">🖨️ Imprimir Notas</a>
         <a href="{{ url_for('estudiantes.index') }}" class="btn btn-outline">&larr; Volver</a>
     </div>
 </div>
@@ -39,14 +42,16 @@
         </div>
         <div class="detail-item">
             <span class="detail-label">Fecha de Registro</span>
-            <span class="detail-value">{{ estudiante.creado_en }}</span>
+            <span class="detail-value">{{ estudiante.creado_en.split(" ")[0] if estudiante.creado_en else "" }}</span>
         </div>
     </div>
 
 
     <div class="mt-4">
         <h3>Calificaciones</h3>
+        {% if g.user and g.user.rol in ['admin', 'direccion'] %}
         <a href="{{ url_for('calificaciones.nueva', estudiante_id=estudiante.id) }}" class="btn btn-sm btn-primary mb-2">+ Añadir Calificaciones</a>
+        {% endif %}
         
         {% if calificaciones %}
             <div class="table-responsive">
@@ -91,10 +96,18 @@
                             <td>{{ calc.frances or "-" }}</td>
                             <td>{{ calc.conducta or "-" }}</td>
                             <td><strong>{{ calc.estado_final or "-" }}</strong></td>
+                            {% if g.user and g.user.rol in ['admin', 'direccion'] %}
                             <td>
                                 <a href="{{ url_for('calificaciones.editar', estudiante_id=estudiante.id, calificacion_id=calc.id) }}" class="btn btn-sm btn-warning">Editar</a>
                                 <form method="post" action="{{ url_for('calificaciones.eliminar', estudiante_id=estudiante.id, calificacion_id=calc.id) }}" style="display:inline;" onsubmit="return confirm('¿Eliminar estas calificaciones?')">
                                     <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                                </form>
+                            </td>
+                            {% else %}
+                            <td>-</td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
                                 </form>
                             </td>
                         </tr>

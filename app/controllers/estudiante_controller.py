@@ -11,6 +11,7 @@ from flask import (
     url_for,
     flash,
 )
+from .auth_controller import login_required, rol_requerido
 from ..models import estudiante as EstudianteModel
 from ..models import calificacion as CalificacionModel
 
@@ -26,14 +27,13 @@ def _validate_form(form):
         errors.append("El nombre es obligatorio.")
     if not form.get("apellido", "").strip():
         errors.append("El apellido es obligatorio.")
-    if not form.get("seccion", "").strip():
-        errors.append("La sección es obligatoria.")
     return errors
 
 
 # ── Rutas ──────────────────────────────────────────────────────────────────────
 
 @estudiantes_bp.route("/")
+@login_required
 def index():
     """Lista todos los estudiantes o muestra resultados de búsqueda."""
     query = request.args.get("q", "").strip()
@@ -49,6 +49,8 @@ def index():
 
 
 @estudiantes_bp.route("/estudiantes/nuevo", methods=["GET", "POST"])
+@login_required
+@rol_requerido('admin', 'direccion')
 def nuevo():
     """Muestra el formulario de registro y procesa la creación."""
     if request.method == "POST":
@@ -70,7 +72,6 @@ def nuevo():
                 apellido=request.form["apellido"].strip(),
                 sexo=request.form.get("sexo", "").strip(),
                 telefono=request.form.get("telefono", "").strip(),
-                seccion=request.form["seccion"].strip(),
                 fecha_nac=request.form.get("fecha_nac", "").strip() or None,
             )
             flash("Estudiante registrado exitosamente.", "success")
@@ -87,6 +88,7 @@ def nuevo():
 
 
 @estudiantes_bp.route("/estudiantes/<int:estudiante_id>")
+@login_required
 def detalle(estudiante_id):
     """Muestra el detalle de un estudiante."""
     estudiante = EstudianteModel.get_by_id(estudiante_id)
@@ -100,6 +102,8 @@ def detalle(estudiante_id):
 
 
 @estudiantes_bp.route("/estudiantes/<int:estudiante_id>/editar", methods=["GET", "POST"])
+@login_required
+@rol_requerido('admin', 'direccion')
 def editar(estudiante_id):
     """Muestra el formulario de edición y procesa la actualización."""
     estudiante = EstudianteModel.get_by_id(estudiante_id)
@@ -127,7 +131,6 @@ def editar(estudiante_id):
                 apellido=request.form["apellido"].strip(),
                 sexo=request.form.get("sexo", "").strip(),
                 telefono=request.form.get("telefono", "").strip(),
-                seccion=request.form["seccion"].strip(),
                 fecha_nac=request.form.get("fecha_nac", "").strip() or None,
             )
             flash("Estudiante actualizado exitosamente.", "success")
@@ -144,6 +147,8 @@ def editar(estudiante_id):
 
 
 @estudiantes_bp.route("/estudiantes/<int:estudiante_id>/eliminar", methods=["POST"])
+@login_required
+@rol_requerido('admin', 'direccion')
 def eliminar(estudiante_id):
     """Elimina un estudiante."""
     estudiante = EstudianteModel.get_by_id(estudiante_id)
@@ -153,3 +158,26 @@ def eliminar(estudiante_id):
         EstudianteModel.delete(estudiante_id)
         flash("Estudiante eliminado exitosamente.", "success")
     return redirect(url_for("estudiantes.index"))
+
+@estudiantes_bp.route("/estudiantes/imprimir_todos")
+@login_required
+def imprimir_todos():
+    """Genera una vista para imprimir a todos los estudiantes y sus calificaciones."""
+    estudiantes = EstudianteModel.get_all()
+    data = []
+    for e in estudiantes:
+        calificaciones = CalificacionModel.get_by_estudiante(e.id)
+        data.append({'estudiante': e, 'calificaciones': calificaciones})
+    return render_template("estudiantes/imprimir_todos.html", data=data)
+
+@estudiantes_bp.route("/estudiantes/<int:estudiante_id>/imprimir")
+@login_required
+def imprimir_individual(estudiante_id):
+    """Genera una vista para imprimir las notas de un estudiante específico."""
+    estudiante = EstudianteModel.get_by_id(estudiante_id)
+    if estudiante is None:
+        flash("Estudiante no encontrado.", "warning")
+        return redirect(url_for("estudiantes.index"))
+    
+    calificaciones = CalificacionModel.get_by_estudiante(estudiante_id)
+    return render_template("estudiantes/imprimir.html", estudiante=estudiante, calificaciones=calificaciones)

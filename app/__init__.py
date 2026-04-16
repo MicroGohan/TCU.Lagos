@@ -16,8 +16,11 @@ def create_app():
     init_db(app)
 
     # Registrar controladores (blueprints)
+    from .controllers.auth_controller import auth_bp
     from .controllers.estudiante_controller import estudiantes_bp
     from .controllers.calificacion_controller import calificaciones_bp
+    
+    app.register_blueprint(auth_bp)
     app.register_blueprint(estudiantes_bp)
     app.register_blueprint(calificaciones_bp)
 

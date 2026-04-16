@@ -29,28 +29,28 @@ def get_by_id(estudiante_id):
     ).fetchone()
 
 
-def create(cedula, nombre, apellido, sexo, seccion, fecha_nac, telefono):
+def create(cedula, nombre, apellido, sexo, fecha_nac, telefono):
     """Inserta un nuevo estudiante y retorna su id."""
     db = _get_db()
     cursor = db.execute(
         """INSERT INTO estudiantes
-           (cedula, nombre, apellido, sexo, seccion, fecha_nac, telefono)
-           VALUES (?, ?, ?, ?, ?, ?, ?)""",
-        (cedula, nombre, apellido, sexo, seccion, fecha_nac, telefono),
+           (cedula, nombre, apellido, sexo, fecha_nac, telefono)
+           VALUES (?, ?, ?, ?, ?, ?)""",
+        (cedula, nombre, apellido, sexo, fecha_nac, telefono),
     )
     db.commit()
     return cursor.lastrowid
 
 
-def update(estudiante_id, cedula, nombre, apellido, sexo, seccion, fecha_nac, telefono):
+def update(estudiante_id, cedula, nombre, apellido, sexo, fecha_nac, telefono):
     """Actualiza los datos de un estudiante existente."""
     db = _get_db()
     db.execute(
         """UPDATE estudiantes
            SET cedula=?, nombre=?, apellido=?, sexo=?,
-               seccion=?, fecha_nac=?, telefono=?
+               fecha_nac=?, telefono=?
            WHERE id=?""",
-        (cedula, nombre, apellido, sexo, seccion, fecha_nac, telefono, estudiante_id),
+        (cedula, nombre, apellido, sexo, fecha_nac, telefono, estudiante_id),
     )
     db.commit()
 

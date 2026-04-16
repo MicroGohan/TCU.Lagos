@@ -4,11 +4,13 @@ Gestiona la conexión y la inicialización del esquema SQLite.
 """
 import sqlite3
 import click
-from flask import g
+from flask import g, current_app
 
 
-def get_db(app):
+def get_db(app=None):
     """Retorna la conexión a la base de datos, creándola si no existe."""
+    if app is None:
+        app = current_app
     if "db" not in g:
         g.db = sqlite3.connect(app.config["DATABASE"])
         g.db.row_factory = sqlite3.Row
@@ -22,14 +24,29 @@ def close_db(e=None):
         db.close()
 
 
-SCHEMA_SQL = """
+SCHEMA_DROP_SQL = """
+DROP TABLE IF EXISTS usuarios;
+DROP TABLE IF EXISTS estudiantes;
+DROP TABLE IF EXISTS calificaciones;
+"""
+
+SCHEMA_CREATE_SQL = """
+CREATE TABLE IF NOT EXISTS usuarios (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    username        TEXT NOT NULL UNIQUE,
+    password_hash   TEXT NOT NULL,
+    rol             TEXT NOT NULL CHECK(rol IN ('admin', 'direccion', 'docente')),
+    nombre_completo TEXT NOT NULL,
+    creado_en       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS estudiantes (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     cedula      TEXT    NOT NULL UNIQUE,
     nombre      TEXT    NOT NULL,
     apellido    TEXT    NOT NULL,
     sexo        TEXT,
-    seccion     TEXT,
+
     fecha_nac   TEXT,
     telefono    TEXT,
     creado_en   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -40,6 +57,7 @@ CREATE TABLE IF NOT EXISTS calificaciones (
     estudiante_id       INTEGER NOT NULL,
     anio_lectivo        INTEGER,
     periodo             TEXT,
+    seccion             TEXT,
     estudios_sociales     INTEGER,
     ciencias            INTEGER,
     espanol             INTEGER,
@@ -66,7 +84,7 @@ def init_db(app):
 
     with app.app_context():
         db = sqlite3.connect(app.config["DATABASE"])
-        db.executescript(SCHEMA_SQL)
+        db.executescript(SCHEMA_CREATE_SQL)
         db.commit()
         db.close()
 
@@ -75,7 +93,8 @@ def init_db(app):
         """Recrea las tablas de la base de datos."""
         with app.app_context():
             db = sqlite3.connect(app.config["DATABASE"])
-            db.executescript(SCHEMA_SQL)
+            db.executescript(SCHEMA_DROP_SQL)
+            db.executescript(SCHEMA_CREATE_SQL)
             db.commit()
             db.close()
         click.echo("Base de datos inicializada.")
