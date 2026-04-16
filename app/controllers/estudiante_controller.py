@@ -38,12 +38,37 @@ def index():
     """Lista todos los estudiantes o muestra resultados de búsqueda."""
     query = request.args.get("q", "").strip()
     if query:
-        estudiantes = EstudianteModel.search(query)
+        datos = EstudianteModel.search_with_enrollment(query)
     else:
-        estudiantes = EstudianteModel.get_all()
+        datos = EstudianteModel.get_all_with_enrollment()
+        
+    agrupados = {}
+    for est in datos:
+        anio = est['anio_lectivo']
+        seccion = est['seccion'] or "Sin sección"
+        if not anio:
+            decada = "Sin clasificar"
+            anio_str = "Sin año asignado"
+        else:
+            decada = f"{(anio // 10) * 10}s"
+            anio_str = str(anio)
+            
+        if decada not in agrupados:
+            agrupados[decada] = {}
+        if anio_str not in agrupados[decada]:
+            agrupados[decada][anio_str] = {}
+        if seccion not in agrupados[decada][anio_str]:
+            agrupados[decada][anio_str][seccion] = []
+            
+        # Avoid duplicate rendering if a student is returned multiple times by SQL Joins
+        # and has same section
+        agrupados[decada][anio_str][seccion].append(est)
+        
+    # We also sort the keys to display them
+    
     return render_template(
         "estudiantes/index.html",
-        estudiantes=estudiantes,
+        agrupados=agrupados,
         query=query,
     )
 
@@ -62,7 +87,8 @@ def nuevo():
                 "estudiantes/form.html",
                 titulo="Registrar Estudiante",
                 accion=url_for("estudiantes.nuevo"),
-                                form=request.form,
+                volver_url=url_for("estudiantes.index"),
+                form=request.form,
             )
 
         try:
@@ -83,7 +109,8 @@ def nuevo():
         "estudiantes/form.html",
         titulo="Registrar Estudiante",
         accion=url_for("estudiantes.nuevo"),
-                form={},
+        volver_url=url_for("estudiantes.index"),
+        form={},
     )
 
 
@@ -120,7 +147,8 @@ def editar(estudiante_id):
                 "estudiantes/form.html",
                 titulo="Editar Estudiante",
                 accion=url_for("estudiantes.editar", estudiante_id=estudiante_id),
-                                form=request.form,
+                volver_url=url_for("estudiantes.detalle", estudiante_id=estudiante_id),
+                form=request.form,
             )
 
         try:
@@ -142,7 +170,8 @@ def editar(estudiante_id):
         "estudiantes/form.html",
         titulo="Editar Estudiante",
         accion=url_for("estudiantes.editar", estudiante_id=estudiante_id),
-                form=dict(estudiante),
+        volver_url=url_for("estudiantes.detalle", estudiante_id=estudiante_id),
+        form=dict(estudiante),
     )
 
 

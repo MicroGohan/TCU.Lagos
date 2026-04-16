@@ -5,7 +5,7 @@
 {% block content %}
 <div class="page-header">
     <h1>{{ titulo }}</h1>
-    <a href="{{ url_for('estudiantes.index') }}" class="btn btn-outline">&larr; Volver</a>
+    <a href="{{ volver_url|default(url_for('estudiantes.index')) }}" class="btn btn-outline">&larr; Volver</a>
 </div>
 
 <div class="card">
@@ -58,7 +58,7 @@
 
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">Guardar</button>
-            <a href="{{ url_for('estudiantes.index') }}" class="btn btn-outline">Cancelar</a>
+            <a href="{{ volver_url|default(url_for('estudiantes.index')) }}" class="btn btn-outline">Cancelar</a>
         </div>
 
     </form>

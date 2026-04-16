@@ -13,6 +13,35 @@ def _get_db():
     return g.db
 
 
+def get_all_with_enrollment():
+    """Retorna todos los estudiantes con su sección y año lectivo (si tienen), ordenados por año y sección."""
+    db = _get_db()
+    return db.execute(
+        """SELECT e.*, c.anio_lectivo, c.seccion 
+           FROM estudiantes e 
+           LEFT JOIN calificaciones c ON e.id = c.estudiante_id 
+           ORDER BY c.anio_lectivo DESC, c.seccion ASC, e.apellido, e.nombre"""
+    ).fetchall()
+
+
+def search_with_enrollment(query):
+    """Busca estudiantes con múltiples filtros cruzados, incluyendo año, sección y nacimiento."""
+    like = f"%{query}%"
+    db = _get_db()
+    return db.execute(
+        """SELECT e.*, c.anio_lectivo, c.seccion 
+           FROM estudiantes e 
+           LEFT JOIN calificaciones c ON e.id = c.estudiante_id 
+           WHERE e.nombre LIKE ? 
+              OR e.apellido LIKE ? 
+              OR e.cedula LIKE ? 
+              OR strftime('%Y', e.fecha_nac) LIKE ?
+              OR CAST(c.anio_lectivo AS TEXT) LIKE ?
+              OR c.seccion LIKE ?
+           ORDER BY c.anio_lectivo DESC, c.seccion ASC, e.apellido, e.nombre""",
+        (like, like, like, like, like, like),
+    ).fetchall()
+
 def get_all():
     """Retorna todos los estudiantes ordenados por apellido."""
     db = _get_db()
