@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Iniciar Sesión - TCU Lagos{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5 col-xl-4 card mt-5">
+        <h2 class="text-center mb-4">Iniciar Sesión</h2>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show" role="alert">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form method="post" action="{{ url_for('auth.login') }}">
+            <div class="form-group mb-3">
+                <label for="username">Usuario</label>
+                <input type="text" class="form-control" id="username" name="username" required autofocus placeholder="Inserte su usuario" />
+            </div>
+            <div class="form-group mb-4">
+                <label for="password">Contraseña</label>
+                <input type="password" class="form-control" id="password" name="password" required placeholder="Inserte su contraseña" />
+            </div>
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary btn-block">Ingresar al Sistema</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

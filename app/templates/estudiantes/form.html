@@ -1,0 +1,107 @@
+﻿{% extends "base.html" %}
+
+{% block title %}{{ titulo }} - TCU Lagos{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{{ titulo }}</h1>
+    <a href="{{ volver_url|default(url_for('estudiantes.index')) }}" class="btn btn-outline">&larr; Volver</a>
+</div>
+
+<div class="card">
+    <form method="post" action="{{ accion }}" novalidate>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="cedula">Cédula <span class="required">*</span></label>
+                <div class="input-group">
+                    <input type="text" id="cedula" name="cedula" class="form-control" value="{{ form.get('cedula', '') }}" placeholder="Ej. 101230456 o DIMEX" required style="width: calc(100% - 100px); display: inline-block;" />
+                    <button type="button" id="btn-buscar-cedula" class="btn btn-secondary" style="width: 90px; padding: 8px;">Buscar</button>
+                </div>
+                <small class="form-text text-muted" id="estado-busqueda">Presione Buscar para autocompletar desde el Registro.</small>
+            </div>
+            <div class="form-group">
+                <label for="fecha_nac">Fecha de Nacimiento</label>
+                <input type="date" id="fecha_nac" name="fecha_nac" class="form-control" value="{{ form.get('fecha_nac', '') }}" />
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="nombre">Nombre <span class="required">*</span></label>
+                <input type="text" id="nombre" name="nombre" class="form-control" value="{{ form.get('nombre', '') }}" placeholder="Nombre(s)" required />
+            </div>
+            <div class="form-group">
+                <label for="apellido">Apellido <span class="required">*</span></label>
+                <input type="text" id="apellido" name="apellido" class="form-control" value="{{ form.get('apellido', '') }}" placeholder="Apellido(s)" required />
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="sexo">Sexo</label>
+                <select id="sexo" name="sexo" class="form-control">  
+                    <option value="">-- Seleccione --</option>
+                    <option value="F" {% if form.get('sexo') == 'F' %}selected{% endif %}>Femenino</option>
+                    <option value="M" {% if form.get('sexo') == 'M' %}selected{% endif %}>Masculino</option>
+                </select>
+            </div>
+            
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                 <label for="telefono">Teléfono</label>
+                 <input type="tel" id="telefono" name="telefono" class="form-control" value="{{ form.get('telefono', '') }}" placeholder="Ej. 8888-8888" />
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <a href="{{ volver_url|default(url_for('estudiantes.index')) }}" class="btn btn-outline">Cancelar</a>
+        </div>
+
+    </form>
+</div>
+
+<script>
+    document.getElementById("btn-buscar-cedula").addEventListener("click", function() {
+        const cedulaInput = document.getElementById("cedula").value.trim().replace(/-/g, "");
+        const estadoLabel = document.getElementById("estado-busqueda");
+        
+        if (cedulaInput.length < 9) {
+            estadoLabel.textContent = "Ingrese una cédula de al menos 9 dígitos.";
+            estadoLabel.style.color = "red";
+            return;
+        }
+
+        estadoLabel.textContent = "Buscando...";
+        estadoLabel.style.color = "blue";
+        
+        fetch("https://apis.gometa.org/cedulas/" + cedulaInput)
+            .then(response => response.json())
+            .then(data => {
+                if (data.results && data.results.length > 0) {
+                    const result = data.results[0];
+                    document.getElementById("nombre").value = result.firstname || "";
+                    document.getElementById("apellido").value = (result.lastname1 + " " + result.lastname2).trim();
+
+                    // Nota: No se puede obtener el sexo ni la fecha de nacimiento por la API pública.
+                    
+                    estadoLabel.textContent = "¡Datos encontrados y autocompletados!";
+                    estadoLabel.style.color = "green";
+                } else {
+                    estadoLabel.textContent = "No se encontraron datos para esta cédula.";
+                    estadoLabel.style.color = "red";
+                }
+            })
+            .catch(error => {
+                console.error("Error consultando API de cédulas:", error);
+                estadoLabel.textContent = "Error al buscar cédula.";
+                estadoLabel.style.color = "red";
+            });
+    });
+</script>
+
+
+{% endblock %}

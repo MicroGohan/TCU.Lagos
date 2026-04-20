@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}Lista de Estudiantes - TCU Lagos{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Estudiantes Registrados</h1>
+    <div>
+        <a href="{{ url_for('estudiantes.imprimir_todos') }}" class="btn btn-secondary" target="_blank">🖨️ Imprimir Todos</a>
+        {% if g.user and g.user.rol in ['admin', 'direccion'] %}
+        <a href="{{ url_for('estudiantes.nuevo') }}" class="btn btn-primary">+ Registrar Estudiante</a>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .folder-card { 
+        background: #343a40; color: white; padding: 25px 15px; text-align: center; 
+        border-radius: 8px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+    }
+    .folder-card:hover { transform: translateY(-4px); box-shadow: 0 6px 12px rgba(0,0,0,0.2); background: #23272b; }
+    .folder-card h3 { margin: 0 0 10px 0; font-size: 1.4rem; }
+    
+    .anio-card { background: #0056b3; }
+    .anio-card:hover { background: #004494; }
+    
+    .seccion-card { background: #ffc107; color: #212529; }
+    .seccion-card:hover { background: #e0a800; }
+    
+    .breadcrumb-nav { background: #e9ecef; padding: 10px 15px; border-radius: 5px; margin-bottom: 20px; font-size: 1rem; }
+    .breadcrumb-nav span { cursor: pointer; color: #0056b3; font-weight: bold; }
+    .breadcrumb-nav span:hover { text-decoration: underline; }
+    .breadcrumb-nav .current { color: #6c757d; cursor: default; text-decoration: none; }
+</style>
+
+<form class="search-form" method="get" action="{{ url_for('estudiantes.index') }}">
+    <input
+        type="search"
+        name="q"
+        value="{{ query }}"
+        placeholder="Buscar por cédula, nombre, año lectivo, fecha nac. o sección..."
+        class="search-input"
+        style="width: 70%;"
+    />
+    <button type="submit" class="btn btn-secondary">Buscar</button>
+    {% if query %}
+        <a href="{{ url_for('estudiantes.index') }}" class="btn btn-outline">Limpiar</a>
+    {% endif %}
+</form>
+
+{% if agrupados %}
+    <!-- Enlace de Navegación (Breadcrumbs) -->
+    <div id="breadcrumb" class="breadcrumb-nav" style="{% if query %}display: none;{% else %}display: block;{% endif %}">
+        <span onclick="abrirNivel('decadas')" id="bc-inicio">🏠 Inicio (Décadas)</span>
+        <span id="bc-decada-container" style="display:none;"> > <span onclick="abrirNivel('anios')" id="bc-decada">Década</span></span>
+        <span id="bc-anio-container" style="display:none;"> > <span onclick="abrirNivel('secciones')" id="bc-anio">Año</span></span>
+        <span id="bc-seccion-container" style="display:none;"> > <span class="current" id="bc-seccion">Sección</span></span>
+    </div>
+
+    <!-- Nivel 1: Cuadrícula de Décadas -->
+    <div id="nivel-decadas" style="{% if query %}display: none;{% else %}display: grid;{% endif %} grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
+        {% for decada, anios in agrupados.items() | sort(reverse=True) %}
+            <div class="folder-card decada-card" onclick="seleccionarDecada('{{ decada|replace(' ', '_') }}', '{{ decada }}')">
+                <h3>📅 {{ decada }}</h3>
+                <small>{{ anios.keys() | length }} Año(s) registrados</small>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Nivel 2: Cuadrícula de Años -->
+    <div id="nivel-anios" style="display: none;">
+        {% for decada, anios in agrupados.items() %}
+            <div id="grid-anios-{{ decada|replace(' ', '_') }}" class="subgrid-anios" style="display: none; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px;">
+                {% for anio, secciones in anios.items() | sort(reverse=True) %}
+                    <div class="folder-card anio-card" onclick="seleccionarAnio('{{ decada|replace(' ', '_') }}', '{{ anio|replace(' ', '_') }}', '{{ decada }}', '{{ anio }}')">
+                        <h3>📖 {{ anio }}</h3>
+                        <small>{{ secciones.keys() | length }} Sección(es)</small>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Nivel 3: Cuadrícula de Secciones -->
+    <div id="nivel-secciones" style="display: none;">
+        {% for decada, anios in agrupados.items() %}
+            {% for anio, secciones in anios.items() %}
+                <div id="grid-secciones-{{ decada|replace(' ', '_') }}-{{ anio|replace(' ', '_') }}" class="subgrid-secciones" style="display: none; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px;">
+                    {% for seccion, lista_estudiantes in secciones.items() | sort %}
+                        <div class="folder-card seccion-card" onclick="seleccionarSeccion('{{ decada|replace(' ', '_') }}', '{{ anio|replace(' ', '_') }}', '{{ seccion|replace(' ', '_') }}', '{{ decada }}', '{{ anio }}', '{{ seccion }}')">
+                            <h3>🏷️ {{ seccion }}</h3>
+                            <small>{{ lista_estudiantes | length }} Estudiantes</small>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+
+    <!-- Nivel 4: Lista de Estudiantes (Tabla) -->
+    <div id="nivel-estudiantes" style="{% if query %}display: block;{% else %}display: none;{% endif %}">
+        {% for decada, anios in agrupados.items() %}
+            {% for anio, secciones in anios.items() %}
+                {% for seccion, lista_estudiantes in secciones.items() %}
+                    <div id="tabla-{{ decada|replace(' ', '_') }}-{{ anio|replace(' ', '_') }}-{{ seccion|replace(' ', '_') }}" class="tabla-resultado" style="{% if not query %}display: none;{% endif %} background-color: white; border: 1px solid #ddd; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                        <h4 style="color: #495057; font-size: 1.2rem; border-bottom: 2px solid #ccc; padding-bottom: 5px; margin-top: 0;">
+                            🏷️ {{ seccion }} ({{ anio }}) 
+                            <span style="font-size: 0.9rem; font-weight: normal; color: #666;">- 📅 {{ decada }}</span>
+                        </h4>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Cédula</th>
+                                        <th>Nombre Completo</th>
+                                        <th>Fecha Nac.</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for e in lista_estudiantes %}
+                                    <tr>
+                                        <td style="width: 20%;">{{ e.cedula }}</td>
+                                        <td style="width: 40%;"><strong>{{ e.apellido }}</strong>, {{ e.nombre }}</td>
+                                        <td style="width: 15%;">{{ e.fecha_nac or '—' }}</td>
+                                        <td class="actions" style="width: 25%;">
+                                            <a href="{{ url_for('estudiantes.detalle', estudiante_id=e.id) }}" class="btn btn-sm btn-info">Ver</a>
+                                            {% if g.user and g.user.rol in ['admin', 'direccion'] %}
+                                            <a href="{{ url_for('estudiantes.editar', estudiante_id=e.id) }}" class="btn btn-sm btn-warning">Editar</a>
+                                            <form method="post" action="{{ url_for('estudiantes.eliminar', estudiante_id=e.id) }}" style="display:inline-block;"
+                                                  onsubmit="return confirm('¿Eliminar a {{ e.nombre }} {{ e.apellido }}?')">
+                                                <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                                            </form>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        {% endfor %}
+    </div>
+
+<script>
+    // Variables para recordar el estado de navegación
+    let currentDecadaId = '';
+    let currentAnioId = '';
+
+    function ocultarTodo() {
+        document.getElementById('nivel-decadas').style.display = 'none';
+        document.getElementById('nivel-anios').style.display = 'none';
+        document.getElementById('nivel-secciones').style.display = 'none';
+        document.getElementById('nivel-estudiantes').style.display = 'none';
+        
+        document.querySelectorAll('.subgrid-anios').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.subgrid-secciones').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.tabla-resultado').forEach(el => el.style.display = 'none');
+    }
+
+    function abrirNivel(nivel) {
+        // En modo búsqueda, el breadcrumb no funciona como carpetas
+        if(window.location.search.includes('q=')) return;
+
+        ocultarTodo();
+        
+        if (nivel === 'decadas') {
+            document.getElementById('nivel-decadas').style.display = 'grid';
+            document.getElementById('bc-decada-container').style.display = 'none';
+            document.getElementById('bc-anio-container').style.display = 'none';
+            document.getElementById('bc-seccion-container').style.display = 'none';
+        } 
+        else if (nivel === 'anios') {
+            document.getElementById('nivel-anios').style.display = 'block';
+            document.getElementById('grid-anios-' + currentDecadaId).style.display = 'grid';
+            document.getElementById('bc-anio-container').style.display = 'none';
+            document.getElementById('bc-seccion-container').style.display = 'none';
+        }
+        else if (nivel === 'secciones') {
+            document.getElementById('nivel-secciones').style.display = 'block';
+            document.getElementById('grid-secciones-' + currentDecadaId + '-' + currentAnioId).style.display = 'grid';
+            document.getElementById('bc-seccion-container').style.display = 'none';
+        }
+    }
+
+    function seleccionarDecada(decadaId, decadaNombre) {
+        currentDecadaId = decadaId;
+        
+        document.getElementById('bc-decada').textContent = decadaNombre;
+        document.getElementById('bc-decada-container').style.display = 'inline';
+        
+        abrirNivel('anios');
+    }
+
+    function seleccionarAnio(decadaId, anioId, decadaNombre, anioNombre) {
+        currentAnioId = anioId;
+        
+        document.getElementById('bc-anio').textContent = anioNombre;
+        document.getElementById('bc-anio-container').style.display = 'inline';
+        
+        abrirNivel('secciones');
+    }
+
+    function seleccionarSeccion(decadaId, anioId, seccionId, decadaNombre, anioNombre, seccionNombre) {
+        document.getElementById('bc-seccion').textContent = seccionNombre;
+        document.getElementById('bc-seccion-container').style.display = 'inline';
+        
+        ocultarTodo();
+        document.getElementById('nivel-estudiantes').style.display = 'block';
+        document.getElementById('tabla-' + decadaId + '-' + anioId + '-' + seccionId).style.display = 'block';
+    }
+</script>
+
+{% else %}
+    <div class="empty-state">
+        <p>
+            {% if query %}
+                No se encontraron estudiantes para "<strong>{{ query }}</strong>".
+            {% else %}
+                No hay estudiantes registrados aún.
+            {% endif %}
+        </p>
+        {% if not query and g.user and g.user.rol in ['admin', 'direccion'] %}
+            <a href="{{ url_for('estudiantes.nuevo') }}" class="btn btn-primary">Registrar primer estudiante</a>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}{{ estudiante.nombre }} {{ estudiante.apellido }} - TCU Lagos{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Detalle del Estudiante</h1>
+    <div>
+        {% if g.user and g.user.rol in ['admin', 'direccion'] %}
+        <a href="{{ url_for('estudiantes.editar', estudiante_id=estudiante.id) }}" class="btn btn-warning">Editar</a>
+        {% endif %}
+        <a href="{{ url_for('estudiantes.imprimir_individual', estudiante_id=estudiante.id) }}" class="btn btn-primary" target="_blank">🖨️ Imprimir Notas</a>
+        <a href="{{ url_for('estudiantes.index') }}" class="btn btn-outline">&larr; Volver</a>
+    </div>
+</div>
+
+<div class="card detail-card">
+    <div class="detail-header">
+        <div class="avatar">{{ estudiante.nombre[0] }}{{ estudiante.apellido[0] }}</div>
+        <div>
+            <h2>{{ estudiante.nombre }} {{ estudiante.apellido }}</h2>
+            <span class="badge">{{ estudiante.seccion }}</span>
+        </div>
+    </div>
+
+    <div class="detail-grid">
+        <div class="detail-item">
+            <span class="detail-label">Cédula</span>
+            <span class="detail-value">{{ estudiante.cedula }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Correo Electrónico</span>
+            <span class="detail-value">{{ estudiante.sexo }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Teléfono</span>
+            <span class="detail-value">{{ estudiante.telefono or '—' }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Fecha de Nacimiento</span>
+            <span class="detail-value">{{ estudiante.fecha_nac or '—' }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Fecha de Registro</span>
+            <span class="detail-value">{{ estudiante.creado_en.split(" ")[0] if estudiante.creado_en else "" }}</span>
+        </div>
+    </div>
+
+
+    <div class="mt-4">
+        <h3>Calificaciones</h3>
+        {% if g.user and g.user.rol in ['admin', 'direccion'] %}
+        <a href="{{ url_for('calificaciones.nueva', estudiante_id=estudiante.id) }}" class="btn btn-sm btn-primary mb-2">+ Añadir Calificaciones</a>
+        {% endif %}
+        
+        {% if calificaciones %}
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered text-center">
+                    <thead>
+                        <tr>
+                            <th>Año / Periodo</th>
+                            <th>Soc</th>
+                            <th>Cien</th>
+                            <th>Esp</th>
+                            <th>Mat</th>
+                            <th>Agri</th>
+                            <th>Ing</th>
+                            <th>Mus</th>
+                            <th>Rel</th>
+                            <th>Fís</th>
+                            <th>Hog</th>
+                            <th>Ind</th>
+                            <th>Plás</th>
+                            <th>Fra</th>
+                            <th>Cond</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for calc in calificaciones %}
+                        <tr>
+                            <td>{{ calc.anio_lectivo }} {% if calc.periodo %} - {{ calc.periodo }}{% endif %}</td>
+                            <td>{{ calc.estudios_sociales or "-" }}</td>
+                            <td>{{ calc.ciencias or "-" }}</td>
+                            <td>{{ calc.espanol or "-" }}</td>
+                            <td>{{ calc.matematica or "-" }}</td>
+                            <td>{{ calc.educacion_agricola or "-" }}</td>
+                            <td>{{ calc.ingles or "-" }}</td>
+                            <td>{{ calc.educacion_musical or "-" }}</td>
+                            <td>{{ calc.educacion_religiosa or "-" }}</td>
+                            <td>{{ calc.educacion_fisica or "-" }}</td>
+                            <td>{{ calc.educacion_hogar or "-" }}</td>
+                            <td>{{ calc.artes_industriales or "-" }}</td>
+                            <td>{{ calc.artes_plasticas or "-" }}</td>
+                            <td>{{ calc.frances or "-" }}</td>
+                            <td>{{ calc.conducta or "-" }}</td>
+                            <td><strong>{{ calc.estado_final or "-" }}</strong></td>
+                            {% if g.user and g.user.rol in ['admin', 'direccion'] %}
+                            <td>
+                                <a href="{{ url_for('calificaciones.editar', estudiante_id=estudiante.id, calificacion_id=calc.id) }}" class="btn btn-sm btn-warning">Editar</a>
+                                <form method="post" action="{{ url_for('calificaciones.eliminar', estudiante_id=estudiante.id, calificacion_id=calc.id) }}" style="display:inline;" onsubmit="return confirm('¿Eliminar estas calificaciones?')">
+                                    <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                                </form>
+                            </td>
+                            {% else %}
+                            <td>-</td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted mt-2">No hay calificaciones registradas para este estudiante.</p>
+        {% endif %}
+    </div>
+
+    <div class="form-actions mt-4">
+
+        <form method="post" action="{{ url_for('estudiantes.eliminar', estudiante_id=estudiante.id) }}"
+              onsubmit="return confirm('¿Está seguro de eliminar a {{ estudiante.nombre }} {{ estudiante.apellido }}?')">
+            <button type="submit" class="btn btn-danger">Eliminar Estudiante</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
